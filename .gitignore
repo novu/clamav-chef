@@ -25,3 +25,4 @@ Vagrantfile
 *.sublime-workspace
 
 test/cookbooks/clamav_test/files/*.cvd
+/.project

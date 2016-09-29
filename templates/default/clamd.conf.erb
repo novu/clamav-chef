@@ -441,53 +441,70 @@
 # Default: 10000
 <%= @clamd["max_files"] ? "MaxFiles #{@clamd["max_files"]}" : "#MaxFiles 15000" %>
 
-
 ##
-## Clamuko settings
+## On-access Scan Settings
 ##
 
-# The number of scanner threads that will be started (DazukoFS only).
-# Having multiple scanner threads allows Clamuko to serve multiple
-# processes simultaneously. This is particularly beneficial on SMP machines.
-# Default: 3
-<%= @clamd["clamuko_scanner_count"] ? "ClamukoScannerCount #{@clamd["clamuko_scanner_count"]}" : "#ClamukoScannerCount 3" %>
-
-# Don't scan files larger than ClamukoMaxFileSize
-# Value of 0 disables the limit.
-# Default: 5M
-<%= @clamd["clamuko_max_file_size"] ? "ClamukoMaxFileSize #{@clamd["clamuko_max_file_size"]}" : "#ClamukoMaxFileSize 10M" %>
-
-# Set access mask for Clamuko (Dazuko only).
+# Enable on-access scanning. Currently, this is supported via fanotify.
+# Clamuko/Dazuko support has been deprecated.
 # Default: no
-<%= @clamd["clamuko_scan_on_open"] ? "ClamukoScanOnOpen #{@clamd["clamuko_scan_on_open"]}" : "#ClamukoScanOnOpen yes" %>
-<%= @clamd["clamuko_scan_on_close"] ? "ClamukoScanOnClose #{@clamd["clamuko_scan_on_close"]}" : "#ClamukoScanOnClose yes" %>
-<%= @clamd["clamuko_scan_on_exec"] ? "ClamukoScanOnExec #{@clamd["clamuko_scan_on_exec"]}" : "#ClamukoScanOnExec yes" %>
+<%= @clamd["scan_onaccess"] ? "ScanOnAccess #{@clamd["scan_onaccess"]}" : "#ScanOnAccess no" %>
 
-# Set the include paths (all files inside them will be scanned). You can have
-# multiple ClamukoIncludePath directives but each directory must be added
-# in a seperate line. (Dazuko only)
+# Set the  mount point to be scanned. The mount point specified, or the mount point
+# containing the specified directory will be watched. If any directories are specified,
+# this option will preempt the DDD system. This will notify only. It can be used multiple times.
+# (On-access scan only)
 # Default: disabled
-#ClamukoIncludePath /home
-#ClamukoIncludePath /students
-<% @clamd["clamuko_include_paths"].each do |cip| %>
-<%= "ClamukoIncludePath #{cip}" %>
+<% @clamd["onaccess_mount_paths"].each do |path| %>
+<%= "OnAccessMountPath #{path}" %>
 <% end %>
 
-# Set the exclude paths. All subdirectories are also excluded. (Dazuko only)
+# Don't scan files larger than OnAccessMaxFileSize
+# Value of 0 disables the limit.
+# Default: 5M
+<%= @clamd["onaccess_max_file_size"] ? "OnAccessMaxFileSize #{@clamd["onaccess_max_file_size"]}" : "#OnAccessMaxFileSize 10M" %>
+
+# Set the include paths (all files inside them will be scanned). You can have
+# multiple OnAccessIncludePath directives but each directory must be added
+# in a separate line. (On-access scan only)
 # Default: disabled
-#ClamukoExcludePath /home/bofh
-<% @clamd["clamuko_exclude_paths"].each do |cep| %>
-<%= "ClamukoExcludePath #{cep}" %>
+<% @clamd["onaccess_include_paths"].each do |path| %>
+<%= "OnAccessIncludePath #{path}" %>
+<% end %>
+
+# Set the exclude paths. All subdirectories are also excluded.
+# (On-access scan only)
+# Default: disabled
+<% @clamd["onaccess_exclude_paths"].each do |path| %>
+<%= "OnAccessExcludePath #{path}" %>
 <% end %>
 
 # With this option you can whitelist specific UIDs. Processes with these UIDs
 # will be able to access all files.
 # This option can be used multiple times (one per line).
 # Default: disabled
-#ClamukoExcludeUID 0
-<% @clamd["clamuko_exclude_uids"].each do |ceu| %>
-<%= "ClamukoExcludeUID #{ceu}" %>
+<% @clamd["onaccess_exclude_uids"].each do |uid| %>
+<%= "OnAccessExcludeUID #{uid}" %>
 <% end %>
+
+# Toggles dynamic directory determination. Allows for recursively watching include paths.
+# (On-access scan only)
+# Default: no
+<%= @clamd["onaccess_disable_ddd"] ? "OnAccessDisableDDD #{@clamd["onaccess_disable_ddd"]}" : "#OnAccessDisableDDD yes" %>
+
+# Modifies fanotify blocking behaviour when handling permission events.
+# If off, fanotify will only notify if the file scanned is a virus,
+# and not perform any blocking.
+# (On-access scan only)
+# Default: no
+<%= @clamd["onaccess_prevention"] ? "OnAccessPrevention #{@clamd["onaccess_prevention"]}" : "#OnAccessPrevention yes" %>
+
+# Toggles extra scanning and notifications when a file or directory is created or moved.
+# Requires the  DDD system to kick-off extra scans.
+# (On-access scan only)
+# Default: no
+OnAccessExtraScanning yes
+<%= @clamd["onaccess_extra_scanning"] ? "OnAccessExtraScanning #{@clamd["onaccess_extra_scanning"]}" : "#OnAccessExtraScanning yes" %>
 
 # With this option enabled ClamAV will load bytecode from the database. 
 # It is highly recommended you keep this option on, otherwise you'll miss detections for many new viruses.
