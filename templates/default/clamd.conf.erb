@@ -503,7 +503,6 @@
 # Requires the  DDD system to kick-off extra scans.
 # (On-access scan only)
 # Default: no
-OnAccessExtraScanning yes
 <%= @clamd["onaccess_extra_scanning"] ? "OnAccessExtraScanning #{@clamd["onaccess_extra_scanning"]}" : "#OnAccessExtraScanning yes" %>
 
 # With this option enabled ClamAV will load bytecode from the database. 
