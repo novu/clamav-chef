@@ -28,7 +28,7 @@ class Chef
       end
 
       def rotate(arg = nil)
-        set_or_return(:rotate, arg, kind_of: Integer)
+        set_or_return(:rotate, arg, kind_of: Fixnum)
       end
 
       def create(arg = nil)

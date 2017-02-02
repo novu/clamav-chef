@@ -9,7 +9,7 @@ describe 'clamav::services' do
   let(:ruby_block) { 'dummy service notification block' }
   let(:runner) do
     ChefSpec::SoloRunner.new(platform) do |node|
-      attributes.each { |k, v| node.override[k] = v }
+      attributes.each { |k, v| node.set[k] = v }
     end
   end
   let(:chef_run) { runner.converge(described_recipe) }
@@ -75,64 +75,55 @@ describe 'clamav::services' do
   {
     Ubuntu: {
       platform: 'ubuntu',
-      versions: %w(12.04 14.10 16.04),
+      version: '12.04',
       clamd_service: 'clamav-daemon',
       freshclam_service: 'clamav-freshclam'
     },
     CentOS: {
       platform: 'centos',
-      versions: %w(6.4),
+      version: '6.4',
       clamd_service: 'clamd',
       freshclam_service: 'freshclam'
     }
   }.each do |k, v|
-    v[:versions].each do |version|
-      before do
-        Fauxhai.mock(platform: v[:platform], version: version) do |node|
-          node['languages']['ruby']['version'] = '2.3.1'
-        end
+    context "a #{k} node" do
+      let(:platform) { { platform: v[:platform], version: v[:version] } }
+      let(:services) do
+        { clamd: v[:clamd_service], freshclam: v[:freshclam_service] }
       end
 
-      context "a #{k} v.#{version} node" do
-        let(:platform) { { platform: v[:platform], version: version } }
+      context 'with all default attributes' do
+        it_behaves_like 'with anything'
+        it_behaves_like 'with the clamd service disabled'
+        it_behaves_like 'with the freshclam service disabled'
+      end
 
-        let(:services) do
-          { clamd: v[:clamd_service], freshclam: v[:freshclam_service] }
+      context 'with the clamd service enabled' do
+        let(:attributes) { { clamav: { clamd: { enabled: true } } } }
+
+        it_behaves_like 'with anything'
+        it_behaves_like 'with the clamd service enabled'
+        it_behaves_like 'with the freshclam service disabled'
+      end
+
+      context 'with the freshclam service enabled' do
+        let(:attributes) { { clamav: { freshclam: { enabled: true } } } }
+
+        it_behaves_like 'with anything'
+        it_behaves_like 'with the clamd service disabled'
+        it_behaves_like 'with the freshclam service enabled'
+      end
+
+      context 'with both services enabled' do
+        let(:attributes) do
+          {
+            clamav: { clamd: { enabled: true }, freshclam: { enabled: true } }
+          }
         end
 
-        context 'with all default attributes' do
-          it_behaves_like 'with anything'
-          it_behaves_like 'with the clamd service disabled'
-          it_behaves_like 'with the freshclam service disabled'
-        end
-
-        context 'with the clamd service enabled' do
-          let(:attributes) { { clamav: { clamd: { enabled: true } } } }
-
-          it_behaves_like 'with anything'
-          it_behaves_like 'with the clamd service enabled'
-          it_behaves_like 'with the freshclam service disabled'
-        end
-
-        context 'with the freshclam service enabled' do
-          let(:attributes) { { clamav: { freshclam: { enabled: true } } } }
-
-          it_behaves_like 'with anything'
-          it_behaves_like 'with the clamd service disabled'
-          it_behaves_like 'with the freshclam service enabled'
-        end
-
-        context 'with both services enabled' do
-          let(:attributes) do
-            {
-              clamav: { clamd: { enabled: true }, freshclam: { enabled: true } }
-            }
-          end
-
-          it_behaves_like 'with anything'
-          it_behaves_like 'with the clamd service enabled'
-          it_behaves_like 'with the freshclam service enabled'
-        end
+        it_behaves_like 'with anything'
+        it_behaves_like 'with the clamd service enabled'
+        it_behaves_like 'with the freshclam service enabled'
       end
     end
   end
